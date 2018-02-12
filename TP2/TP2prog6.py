@@ -22,19 +22,20 @@ def calc_error(clf, X_test, Y_test):
                 e = e + confusion[i][j]
     return e / len(Y_test), confusion
 
-digits=load_digits()
+
+digits = load_digits()
 
 X_learn, X_test, Y_learn, Y_test = train_test_split(digits.data, digits.target, test_size=0.3, random_state=random.seed())
 
-kf=KFold(shuffle=True, n_splits=10)
-scoresGini=[]
-scoresEntropy=[]
-for k in range(1,50):
+kf = KFold(shuffle=True, n_splits=10)
+scoresGini = []
+scoresEntropy = []
+for k in range(1, 50):
     gini = 0
     entropie = 0
 
-    clf_gini = tree.DecisionTreeClassifier(max_leaf_nodes=10*k)
-    clf_entropy = tree.DecisionTreeClassifier(max_leaf_nodes=10*k, criterion='entropy')
+    clf_gini = tree.DecisionTreeClassifier(max_leaf_nodes=10 * k)
+    clf_entropy = tree.DecisionTreeClassifier(max_leaf_nodes=10 * k, criterion='entropy')
 
     for train, test in kf.split(X_learn):
         X_train = X_learn[train]
@@ -51,11 +52,11 @@ for k in range(1,50):
     scoresGini.append(gini)
     scoresEntropy.append(entropie)
 
-print("meilleure valeur pour k gini: ",scoresGini.index(max(scoresGini))+1)
-print("meilleure valeur pour k entropy: ",scoresEntropy.index(max(scoresEntropy))+1)
+print("meilleure valeur pour k gini: ", scoresGini.index(max(scoresGini)) + 1)
+print("meilleure valeur pour k entropy: ", scoresEntropy.index(max(scoresEntropy)) + 1)
 
-k_gini = 10 * (scoresGini.index(max(scoresGini))+1)
-k_entropy = 10 *(scoresEntropy.index(max(scoresEntropy))+1)
+k_gini = 10 * (scoresGini.index(max(scoresGini)) + 1)
+k_entropy = 10 * (scoresEntropy.index(max(scoresEntropy)) + 1)
 
 clf_gini = tree.DecisionTreeClassifier(max_leaf_nodes=k_gini)
 clf_entropy = tree.DecisionTreeClassifier(max_leaf_nodes=k_entropy, criterion='entropy')
@@ -66,13 +67,42 @@ clf_entropy.fit(X_learn, Y_learn)
 print("Matrice gini:")
 e_gini, confusion_gini = calc_error(clf_gini, X_test, Y_test)
 
-I_gini = [e_gini - 1.96 * math.sqrt((e_gini * (1 - e_gini))/len(X_test)), e_gini + 1.96 * math.sqrt((e_gini * (1 - e_gini))/len(X_test))]
+I_gini = [e_gini - 1.96 * math.sqrt((e_gini * (1 - e_gini)) / len(X_test)),
+          e_gini + 1.96 * math.sqrt((e_gini * (1 - e_gini)) / len(X_test))]
 
 print("Matrice entropy:")
 e_entropy, confusion_entropy = calc_error(clf_entropy, X_test, Y_test)
 
-I_entropy = [e_entropy - 1.96 * math.sqrt((e_entropy * (1 - e_entropy))/len(X_test)), e_entropy + 1.96 * math.sqrt((e_entropy * (1 - e_entropy))/len(X_test))]
+I_entropy = [e_entropy - 1.96 * math.sqrt((e_entropy * (1 - e_entropy)) / len(X_test)),
+             e_entropy + 1.96 * math.sqrt((e_entropy * (1 - e_entropy)) / len(X_test))]
 
-print("Gini = Erreur = ",e_gini, " Interval = ", I_gini)
-print("Entropy = Erreur = ",e_entropy, " Interval = ", I_entropy)
+print("Gini: Erreur = ", e_gini, " Interval = ", I_gini)
+print("Entropy: Erreur = ", e_entropy, " Interval = ", I_entropy)
 
+print("First classifier: Gini")
+print("Second classifier: Entropy")
+
+
+def bestClassifier(confusion_gini, confusion_entropy):
+    Matrix = confusion_gini - confusion_entropy
+    n10 = 0
+    n01 = 0
+    for i in range(len(confusion_gini)):
+        if (Matrix[i][i] < 0):
+            n01 -= Matrix[i][i]
+        else:
+            n10 += Matrix[i][i]
+
+    if (n01 + n10 != 0):
+        print(n10)
+        print(n01)
+        print(((math.fabs(n01 - n10) - 1) ** 2) / (n01 + n10))
+        if (((math.fabs(n01 - n10) - 1) ** 2) / (n01 + n10) > 3.841459):
+            print("95% certainty that one is better than the other")
+        else:
+            print("No certainty")
+    else:
+        print("ERROR: Divise by 0")
+
+
+bestClassifier(confusion_gini, confusion_entropy)
