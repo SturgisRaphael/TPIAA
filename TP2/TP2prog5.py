@@ -29,22 +29,15 @@ if __name__ == '__main__':
 
         X_app, X_test, Y_app, Y_test = train_test_split(X1, Y1, test_size=0.2, random_state=random.seed())
 
-        print("ping")
-
         clf = tree.DecisionTreeClassifier()
         clf = clf.fit(X_app, Y_app)
 
         e = calc_error(clf, X_test, Y_test)
 
-        #print("e = ", e)
-
         I = [e - 1.96 * math.sqrt((e * (1 - e))/len(X_test)), e + 1.96 * math.sqrt((e * (1 - e))/len(X_test))]
-
-        #print("I = ", I)
 
         f = calc_error(clf, X2, Y2)
 
-        #print("f = ", f)
 
         if(not(I[0] < f < I[1])):
             nbOutOfBound += 1
