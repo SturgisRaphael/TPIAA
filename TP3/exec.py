@@ -70,8 +70,10 @@ for i in range(10):
     w_mean += RegLin(X,Y)
 w_mean = w_mean/10
 print(w,w_mean)
+print(RSS(X,Y,w),RSS(X,Y,w_mean))
 
 nbEx = 1000
 X,Y = GenData(x_min, x_max, w, nbEx, sigma)
 w_estime = RegLin(X,Y)
+print(RSS(X,Y,w),RSS(X,Y,w_estime))
 print(w,w_estime)
